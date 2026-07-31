@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,9 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -86,54 +85,67 @@ private fun SrootApp(viewModel: AppViewModel = viewModel()) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(0.34f)
-                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp),
             ) {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.Top,
                 ) {
-                    TargetCard(
-                        modifier = Modifier.weight(2f),
-                        snapshot = state.snapshot,
-                        matchedProfile = state.matchedProfile,
-                        manifestError = state.manifestError,
-                    )
-                    WorkflowCard(
-                        modifier = Modifier.weight(1f),
-                        stage = state.stage,
-                        failedAt = state.failedAt,
-                        note = state.stageNote,
-                        error = state.stageError,
-                    )
-                }
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    OutlinedButton(
-                        modifier = Modifier.weight(1f),
-                        enabled = !state.running,
-                        onClick = viewModel::refreshSnapshot,
+                    Column(
+                        modifier = Modifier
+                            .weight(2f)
+                            .fillMaxHeight(),
                     ) {
-                        Text(stringResource(R.string.refresh))
+                        TargetCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            snapshot = state.snapshot,
+                            matchedProfile = state.matchedProfile,
+                            manifestError = state.manifestError,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        OutlinedButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !state.running,
+                            onClick = viewModel::refreshSnapshot,
+                        ) {
+                            Text(stringResource(R.string.refresh))
+                        }
                     }
-                    Button(
-                        modifier = Modifier.weight(1f),
-                        enabled = !state.running && state.matchedProfile != null,
-                        onClick = viewModel::runDiagnostics,
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                     ) {
-                        if (state.running) {
-                            CircularProgressIndicator(strokeWidth = 2.dp)
-                        } else {
-                            Text(stringResource(R.string.run_diagnostics))
+                        WorkflowCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            stage = state.stage,
+                            failedAt = state.failedAt,
+                            note = state.stageNote,
+                            error = state.stageError,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !state.running && state.matchedProfile != null,
+                            onClick = viewModel::runDiagnostics,
+                        ) {
+                            if (state.running) {
+                                CircularProgressIndicator(strokeWidth = 2.dp)
+                            } else {
+                                Text(stringResource(R.string.run_diagnostics))
+                            }
                         }
                     }
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(4.dp))
             }
             HorizontalDivider()
             LazyColumn(
@@ -162,8 +174,12 @@ private fun TargetCard(
     matchedProfile: SupportProfile?,
     manifestError: String?,
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(12.dp)) {
+    Card(modifier = modifier.fillMaxHeight()) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(12.dp),
+        ) {
             Text(
                 stringResource(R.string.device_context),
                 style = MaterialTheme.typography.titleMedium,
@@ -185,6 +201,14 @@ private fun TargetCard(
                 stringResource(R.string.support_profile),
                 matchedProfile?.profileId
                     ?: stringResource(R.string.profile_unmatched),
+            )
+            DeviceLine(
+                stringResource(R.string.selection_method),
+                stringResource(R.string.profile_auto),
+            )
+            DeviceLine(
+                stringResource(R.string.profile_mode),
+                matchedProfile?.mode ?: stringResource(R.string.profile_none),
             )
             Text(
                 text = matchedProfile?.displayName
@@ -230,8 +254,13 @@ private fun WorkflowCard(
         stringResource(noteLabel(note))
     }
 
-    Card(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(12.dp)) {
+    Card(modifier = modifier.fillMaxHeight()) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -243,6 +272,8 @@ private fun WorkflowCard(
                 Spacer(Modifier.weight(1f))
                 Text(
                     title,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     color = if (stage == WorkflowStage.FAILED) {
                         MaterialTheme.colorScheme.error
                     } else {
@@ -251,10 +282,9 @@ private fun WorkflowCard(
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
-            Spacer(Modifier.height(8.dp))
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 workflowSteps.forEach { step ->
                     StageStep(
@@ -268,9 +298,9 @@ private fun WorkflowCard(
             Spacer(Modifier.height(8.dp))
             Text(
                 detail,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelSmall,
             )
         }
     }
@@ -297,7 +327,7 @@ private fun StageStep(
     ) {
         Box(
             modifier = Modifier
-                .size(28.dp)
+                .size(22.dp)
                 .clip(CircleShape)
                 .background(color),
             contentAlignment = Alignment.Center,
@@ -314,10 +344,10 @@ private fun StageStep(
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
                 },
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(14.dp),
             )
         }
-        Spacer(Modifier.size(8.dp))
+        Spacer(Modifier.size(6.dp))
         Text(
             text = stringResource(stageLabel(step)),
             maxLines = 1,
