@@ -6,18 +6,38 @@ import org.json.JSONObject
 data class SupportProfile(
     val profileId: String,
     val displayName: String,
+    val priority: Int,
     val models: Set<String>,
     val fingerprintPrefixes: List<String>,
     val androidReleases: Set<String>,
     val abis: Set<String>,
     val mode: String,
 ) {
-    fun matches(snapshot: DeviceSnapshot): Boolean {
-        val fingerprintMatches = fingerprintPrefixes.any(snapshot.fingerprint::startsWith)
-        return snapshot.model in models &&
-            fingerprintMatches &&
-            snapshot.androidRelease in androidReleases &&
-            snapshot.abi in abis
+    fun matchScore(snapshot: DeviceSnapshot): Int? {
+        if (snapshot.model !in models) {
+            return null
+        }
+        if (androidReleases.isNotEmpty() &&
+            snapshot.androidRelease !in androidReleases
+        ) {
+            return null
+        }
+        if (abis.isNotEmpty() && snapshot.abi !in abis) {
+            return null
+        }
+
+        val fingerprintLength = fingerprintPrefixes
+            .filter(snapshot.fingerprint::startsWith)
+            .maxOfOrNull(String::length)
+            ?: return null
+
+        val androidScore = if (androidReleases.isNotEmpty()) 10 else 0
+        val abiScore = if (abis.isNotEmpty()) 1 else 0
+        return priority * 1_000_000 +
+            100_000 +
+            fingerprintLength * 100 +
+            androidScore +
+            abiScore
     }
 }
 
@@ -26,7 +46,12 @@ class SupportManifest(
     val profiles: List<SupportProfile>,
 ) {
     fun match(snapshot: DeviceSnapshot): SupportProfile? =
-        profiles.firstOrNull { it.matches(snapshot) }
+        profiles
+            .mapNotNull { profile ->
+                profile.matchScore(snapshot)?.let { score -> score to profile }
+            }
+            .maxByOrNull { it.first }
+            ?.second
 
     companion object {
         fun load(context: Context): SupportManifest {
@@ -43,6 +68,7 @@ class SupportManifest(
                         SupportProfile(
                             profileId = item.getString("profileId"),
                             displayName = item.getString("displayName"),
+                            priority = item.optInt("priority", 0),
                             models = item.stringSet("models"),
                             fingerprintPrefixes = item.stringList("fingerprintPrefixes"),
                             androidReleases = item.stringSet("androidReleases"),

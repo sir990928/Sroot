@@ -71,6 +71,17 @@ The JSON manifest contains public device matching data only. It does not
 contain private offsets, helper binaries, or executable payloads. The current
 S9380 profile is marked `diagnostic`.
 
+Profiles are selected automatically by match score. The selector checks the
+model first, then the longest matching build-fingerprint prefix, Android
+release, ABI, and optional profile priority. To add another supported device,
+append a new profile to `app/src/main/assets/support_manifest.json`; do not
+hard-code a second device in the Kotlin UI.
+
+The APP UI keeps the device/profile panel fixed above an independently
+scrollable log area. The workflow indicator separates `识别`, `下载`, `开始`,
+and `完成`. In this public diagnostic build, the download stage only
+checks the public manifest and does not fetch or execute a root payload.
+
 Build this branch with:
 
 ```powershell
@@ -80,6 +91,23 @@ Build this branch with:
 The Android SDK and NDK must be configured locally. The generated APK is a
 diagnostic build and is not evidence that the private V6 ADB/shell path works
 from an ordinary application process.
+
+## Device Smoke Test
+
+The debug APK was installed on the target SM-S9380 and launched successfully.
+The JSON profile matched `pa3q-S9380ZHU1AYA1`, and the native probe returned:
+
+```text
+uid/euid: ordinary application UID
+selinux_context: u:r:untrusted_app:s0
+tracefs_control: ok
+tracefs_event: denied
+ashmem: ok
+boot_id: ok
+```
+
+This confirms the APP shell, JSON matching, JNI loading, and log rendering.
+It does not grant or attempt privileged access.
 
 ## Adaptation Model
 

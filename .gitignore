@@ -1,5 +1,7 @@
 # Build output
 .gradle/
+.cxx/
+local.properties
 build/
 out/
 dist/

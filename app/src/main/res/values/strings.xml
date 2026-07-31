@@ -1,4 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Sroot APP</string>
+    <string name="device_context">设备信息</string>
+    <string name="model">机型</string>
+    <string name="device">设备代号</string>
+    <string name="android">Android</string>
+    <string name="android_version">Android %1$s（SDK %2$d）</string>
+    <string name="kernel">内核</string>
+    <string name="abi">系统 ABI</string>
+    <string name="page_size">页面大小</string>
+    <string name="support_profile">支持配置</string>
+    <string name="selection_method">选择方式</string>
+    <string name="profile_mode">配置模式</string>
+    <string name="profile_auto">自动匹配</string>
+    <string name="profile_unmatched">不支持此设备</string>
+    <string name="profile_none">无</string>
+    <string name="manifest">配置清单</string>
+    <string name="manifest_error">配置清单错误：%1$s</string>
+    <string name="refresh">刷新设备信息</string>
+    <string name="run_diagnostics">运行诊断</string>
+    <string name="native_probe">Native 诊断</string>
+    <string name="no_diagnostic">还没有运行诊断</string>
+    <string name="workflow_title">执行阶段</string>
+    <string name="workflow_waiting">等待开始</string>
+    <string name="workflow_failed">执行失败</string>
+    <string name="workflow_failed_detail">失败：%1$s</string>
+    <string name="workflow_note_waiting">上方设备信息固定显示，点击开始后按阶段推进</string>
+    <string name="workflow_note_identifying">正在识别机型、Android 版本和支持配置</string>
+    <string name="workflow_note_preparing">正在检查公开配置和诊断资源</string>
+    <string name="workflow_note_starting">正在启动 Native 诊断入口</string>
+    <string name="workflow_note_running">正在读取应用进程权限和系统可见性</string>
+    <string name="workflow_note_done">诊断完成，当前结果不会授予 root 权限</string>
+    <string name="workflow_note_failed">当前阶段未完成</string>
+    <string name="stage_identify">识别</string>
+    <string name="stage_download">下载</string>
+    <string name="stage_start">开始</string>
+    <string name="stage_complete">完成</string>
 </resources>
