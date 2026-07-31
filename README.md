@@ -78,9 +78,11 @@ append a new profile to `app/src/main/assets/support_manifest.json`; do not
 hard-code a second device in the Kotlin UI.
 
 The APP UI keeps the device/profile panel fixed above an independently
-scrollable log area. The workflow indicator separates `识别`, `下载`, `开始`,
-and `完成`. In this public diagnostic build, the download stage only
-checks the public manifest and does not fetch or execute a root payload.
+scrollable log area. The device card uses roughly two thirds of the fixed
+header width, while the four-step workflow is shown vertically beside it:
+`识别`, `下载`, `开始`, and `完成`. In this public diagnostic build, the
+download stage only checks the public manifest and does not fetch or execute a
+root payload.
 
 Build this branch with:
 

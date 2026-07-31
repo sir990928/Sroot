@@ -96,7 +96,7 @@ private fun SrootApp(viewModel: AppViewModel = viewModel()) {
                     verticalAlignment = Alignment.Top,
                 ) {
                     TargetCard(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(2f),
                         snapshot = state.snapshot,
                         matchedProfile = state.matchedProfile,
                         manifestError = state.manifestError,
@@ -140,7 +140,12 @@ private fun SrootApp(viewModel: AppViewModel = viewModel()) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(0.66f),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    top = 16.dp,
+                    end = 16.dp,
+                    bottom = 0.dp,
+                ),
             ) {
                 item {
                     LogCard(state.log)
@@ -247,13 +252,13 @@ private fun WorkflowCard(
                 )
             }
             Spacer(Modifier.height(8.dp))
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 workflowSteps.forEach { step ->
                     StageStep(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         step = step,
                         activeIndex = activeIndex,
                         failed = stage == WorkflowStage.FAILED && failedAt == step,
@@ -286,9 +291,9 @@ private fun StageStep(
         active -> MaterialTheme.colorScheme.tertiary
         else -> MaterialTheme.colorScheme.surfaceVariant
     }
-    Column(
+    Row(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
@@ -312,7 +317,7 @@ private fun StageStep(
                 modifier = Modifier.size(18.dp),
             )
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.size(8.dp))
         Text(
             text = stringResource(stageLabel(step)),
             maxLines = 1,
