@@ -22,9 +22,9 @@ jobs:
       - name: 安装依赖工具
         run: sudo apt update && sudo apt install -y make wget unzip zip
 
-      - name: 下载并解压 NDK r27
+      - name: 下载并解压 NDK r27 (Google官方源)
         run: |
-          wget https://mirrors.ustc.edu.cn/android/repository/android-ndk-r27-linux.zip
+          wget https://dl.google.com/android/repository/android-ndk-r27-linux.zip
           unzip -q android-ndk-r27-linux.zip
           echo "ANDROID_NDK_HOME=$PWD/android-ndk-r27" >> $GITHUB_ENV
 
@@ -32,7 +32,7 @@ jobs:
         run: |
           CLANG_PATH=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-clang
           echo "编译器路径: $CLANG_PATH"
-          test -x "$CLANG_PATH" || { echo "错误：编译器不存在！NDK下载损坏"; exit 1; }
+          test -x "$CLANG_PATH" || { echo "错误：编译器不存在！NDK包损坏"; exit 1; }
 
       - name: 编译漏洞程序
         run: |
