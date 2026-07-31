@@ -26,13 +26,16 @@ jobs:
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r29
-        env:
-          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk-r29
+        # 删除！不要手动覆盖ANDROID_NDK_HOME，让action自动设置
+        # env:
+        #   ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk-r29
 
       - name: 校验NDK编译器
         run: |
           CLANG_PATH=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-clang
-          echo "编译器路径: $CLANG_PATH"
+          echo "ANDROID_NDK_HOME = $ANDROID_NDK_HOME"
+          echo "Clang完整路径 = $CLANG_PATH"
+          ls -la ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/ || echo "bin目录不存在"
           test -x "$CLANG_PATH" || { echo "错误：编译器不存在！"; exit 1; }
 
       - name: 编译漏洞程序
