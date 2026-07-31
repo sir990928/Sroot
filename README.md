@@ -1,130 +1,102 @@
-# Sroot
+# S9380ZHU1AYA1 V6 source package
 
-Sroot is a community-maintained research fork for documenting and testing
-device-specific adaptations around the CVE-2026-43499 research chain.
+This is the minimal source package used to compile the V6 payload that
+reached `done=1 root=1` on SM-S9380 ZHU firmware S9380ZHU1AYA1.
 
-This repository is a secondary project. The original exploit research and
-the earlier Samsung adaptation remain upstream projects; Sroot keeps the
-device-specific work, reproducibility notes, and documentation separate.
+The package intentionally does not contain `.o` files. They are generated
+under `build/v6/obj` or `objects-rebuilt` during compilation.
 
-## Current Target
+## Target configuration
 
-| Field | Value |
-| --- | --- |
-| Device | Samsung Galaxy S25 Ultra |
-| Model | SM-S9380 |
-| Region | Hong Kong |
-| CSC | ZHU |
-| Firmware | S9380ZHU1AYA1 |
-| Android | 15 |
-| Build fingerprint | `samsung/pa3qzhx/pa3q:15/AP3A.240905.015/S9380ZHU1AYA1:user/release-keys` |
+The offset table is:
 
-The current private laboratory validation reached `root=1` through the
-ADB/shell test path on the target firmware. The public repository does not
-include the operational payload, root helper, device offsets, or a no-ADB
-APK payload.
+`target/pa3q-S9380ZHU1AYA1/target.h`
 
-## Branch Layout
+Target table SHA-256:
 
-The project keeps the APP work and the native SO work in separate branches:
+`F0DD37BDDFCF157CE2ACD9E3CEA7D6D5002C3EF15BA0F7094EF32375DBFE8D51`
 
-| Branch | Purpose |
-| --- | --- |
-| `main` | Current SM-S9380 ZHU AYA1 validation status, adaptation notes, and project documentation |
-| `app` | APK/JNI framework, process-context diagnostics, and authorized-service integration |
-| `cve-so` | Native SO build/reproducibility notes and private-artifact checklist |
-
-The `main` branch records the currently validated research milestone. The
-`app` and `cve-so` branches are development tracks and must not be treated as
-interchangeable build outputs.
-
-## Upstream And References
-
-Sroot is based on the following upstream research project:
-
-- [NebuSec/CyberMeowfia - original CVE-2026-43499 research](https://github.com/NebuSec/CyberMeowfia/tree/main/IonStack/CVE-2026-43499/exploit)
-
-Sroot is a secondary device-adaptation project built around that original
-research. It is not an upstream replacement and does not claim ownership of
-the original work.
-
-For the APP-side project structure and application packaging flow, see:
-
-- [BuSung-dev/Root-My-Galaxy - APP reference](https://github.com/BuSung-dev/Root-My-Galaxy)
-
-The APP branch may reuse that project's application architecture, lifecycle,
-native-library loading arrangement, and logging layout. Its native payload
-and device adaptation remain separate Sroot work and are not copied from the
-reference project's exploit path.
-
-## Adaptation Model
-
-The project separates generic research code from device-specific data:
+Important values:
 
 ```text
-generic research chain
-        |
-        +-- target profile
-        |     +-- exact build fingerprint
-        |     +-- kernel image and symbol information
-        |     +-- validated structure/function data
-        |     +-- boot and userland constraints
-        |
-        +-- build and validation notes
+KIMAGE_TEXT_BASE                    0xffffffc080000000
+SLIDE_TRACEFS_WORKER_CALLER_OFF     0x000d7ca0
+ASHMEM_MISC_FOPS_OFF                0x02329ee0
+ASHMEM_MISC_FOPS_FIELD_OFF         0x02329ef0
+ASHMEM_FOPS_OFF                     0x0133b148
+CONFIGFS_READ_ITER_OFF              0x0046e5f8
+CONFIGFS_BIN_WRITE_ITER_OFF         0x0046eb24
+INIT_TASK_OFF                       0x0215cd00
+ROOT_TASK_GROUP_OFF                 0x023bed00
+SELINUX_ENFORCING_OFF               0x02420e98
+CALL_USERMODEHELPER_EXEC_WORK_OFF   0x000cf408
+SYSTEM_UNBOUND_WQ_OFF               0x02149e60
+ROOT_UMH_PATH                       /data/local/tmp/cve-2026-43499-root
 ```
 
-For a new device or firmware:
+## Source split
 
-1. Record the exact model, CSC, firmware build, Android version, and build
-   fingerprint.
-2. Keep the generic upstream code unchanged while collecting device-specific
-   evidence.
-3. Put target-specific values in a separate profile instead of scattering
-   constants through the exploit logic.
-4. Rebuild from a clean tree and record compiler, NDK, source revision, and
-   artifact hashes.
-5. Validate in stages: build/load, information disclosure, control-flow
-   redirection, memory read/write primitive, and privileged handoff.
-6. Treat ADB/shell validation and ordinary-app validation as separate
-   environments. An APK process has different SELinux, filesystem, and
-   process-launch constraints.
+`src/original` contains `main.c`, `util.c`, `fops.c`, `pipe.c`,
+`preload_minimal.c`, and compatibility globals from the restored original
+tree.
 
-Detailed documentation is in
-[`docs/ADAPTATION.md`](docs/ADAPTATION.md).
+`src/device` contains the tracefs `slide.c` and UMH `root.c`. These two files
+were compiled with the device include tree; the object hashes match the V6
+objects saved in `objects`.
 
-## Repository Policy
+`helper/su_daemon.c` is the helper used both by `--run-payload` and by the
+kernel UMH path. It must be installed at the fixed `ROOT_UMH_PATH`.
 
-The public main branch is documentation-first. Do not commit:
+## Build on Windows
 
-- operational root payloads or APKs;
-- root helpers or embedded privileged binaries;
-- device-specific exploit offsets;
-- boot images, firmware packages, or private logs containing sensitive data;
-- generated `.o`, `.so`, APK, or test artifacts.
+Open PowerShell in this directory and run:
 
-Private lab artifacts should stay in a separate, access-controlled workspace.
-The repository may contain non-operational build examples, test stubs, and
-environment diagnostics.
+```powershell
+.\build-v6.ps1
+```
 
-## Reproducibility
+The script defaults to the NDK r29 clang path used for the successful build.
+Pass `-Clang` if the NDK is installed elsewhere.
 
-Every target adaptation should provide:
+The outputs are written to `artifact-rebuilt/`.
 
-- a target profile name;
-- source revision and upstream commit;
-- exact compiler/NDK version;
-- build command;
-- input artifact hashes;
-- a redacted validation log;
-- a clear statement of the execution context.
+## Build with Make
 
-Do not describe a build as APP-compatible unless it has been tested from an
-ordinary application process. A successful ADB run alone is not evidence that
-an APK can execute the same path.
+On Linux, WSL, or macOS with an Android NDK clang:
 
-## Legal And Safety Notice
+```sh
+make CLANG=/path/to/clang
+```
 
-Use this project only on devices you own or are explicitly authorized to
-test. Samsung firmware, kernel images, and third-party source remain subject
-to their respective licenses. This repository is for defensive research,
-reproducibility, and device compatibility study.
+The Makefile creates intermediate files under `build/v6/obj`; they are not
+needed at runtime and can be removed with `make clean`.
+
+The expected payload hash is:
+
+`B4A4E0A69B081FEC4840D0E47CDE5C4FAD50D9F93B04908739A5EC64B085EFCA`
+
+The known-good V6 payload hash is:
+
+`B4A4E0A69B081FEC4840D0E47CDE5C4FAD50D9F93B04908739A5EC64B085EFCA`
+
+The helper source is `helper/su_daemon.c`; it is compiled together with the
+payload by `build-v6.ps1` or `make`.
+
+## Runtime entry
+
+The successful ADB entry used the helper loader, not direct `LD_PRELOAD`:
+
+```text
+PSELECT_ROUTE_ATTEMPTS=1
+PSELECT_DELAY_USEC=10000
+/data/local/tmp/cve-2026-43499-root --run-payload \
+  /data/local/tmp/cve-2026-43499-root-original-zhu-v6.so \
+  /data/local/tmp/cve-2026-43499-root \
+  /data/local/tmp/zhu-v6.log
+```
+
+The success line from the known-good run was:
+
+```text
+pipe-physrw-summary ... done=1 root=1 ...
+```
