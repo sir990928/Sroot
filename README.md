@@ -40,17 +40,17 @@ interchangeable build outputs.
 
 ## Upstream And References
 
-Sroot builds on the following projects and should be read together with them:
+Sroot is based on the following upstream research project:
 
-1. [NebuSec/CyberMeowfia - original CVE-2026-43499 research](https://github.com/NebuSec/CyberMeowfia/tree/main/IonStack/CVE-2026-43499/exploit)
-2. [2253845067/Root-My-Galaxy-Payloads](https://github.com/2253845067/Root-My-Galaxy-Payloads)
-3. [2253845067/Root-My-Galaxy](https://github.com/2253845067/Root-My-Galaxy)
-4. [BuSung-dev/Root-My-Galaxy-Payloads](https://github.com/BuSung-dev/Root-My-Galaxy-Payloads)
-5. [BuSung-dev/Root-My-Galaxy](https://github.com/BuSung-dev/Root-My-Galaxy)
+- [NebuSec/CyberMeowfia - original CVE-2026-43499 research](https://github.com/NebuSec/CyberMeowfia/tree/main/IonStack/CVE-2026-43499/exploit)
 
-The first project is the original research baseline. The Samsung repositories
-are adaptation references. Sroot is not an upstream replacement and does not
-claim ownership of the original research.
+Sroot is a secondary device-adaptation project built around that original
+research. It is not an upstream replacement and does not claim ownership of
+the original work.
+
+For APP-side project structure only, see:
+
+- [BuSung-dev/Root-My-Galaxy - APP reference](https://github.com/BuSung-dev/Root-My-Galaxy)
 
 ## Adaptation Model
 
