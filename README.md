@@ -48,9 +48,14 @@ Sroot is a secondary device-adaptation project built around that original
 research. It is not an upstream replacement and does not claim ownership of
 the original work.
 
-For APP-side project structure only, see:
+For the APP-side project structure and application packaging flow, see:
 
 - [BuSung-dev/Root-My-Galaxy - APP reference](https://github.com/BuSung-dev/Root-My-Galaxy)
+
+The APP branch may reuse that project's application architecture, lifecycle,
+native-library loading arrangement, and logging layout. Its native payload
+and device adaptation remain separate Sroot work and are not copied from the
+reference project's exploit path.
 
 ## Adaptation Model
 
