@@ -24,12 +24,20 @@ jobs:
 
       - name: 下载并解压 NDK r27
         run: |
-          wget -q https://dl.google.com/android/repository/android-ndk-r27-linux.zip
+          wget https://mirrors.ustc.edu.cn/android/repository/android-ndk-r27-linux.zip
           unzip -q android-ndk-r27-linux.zip
           echo "ANDROID_NDK_HOME=$PWD/android-ndk-r27" >> $GITHUB_ENV
 
+      - name: 校验NDK编译器
+        run: |
+          CLANG_PATH=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-clang
+          echo "编译器路径: $CLANG_PATH"
+          test -x "$CLANG_PATH" || { echo "错误：编译器不存在！NDK下载损坏"; exit 1; }
+
       - name: 编译漏洞程序
-        run: make TARGET=${{ env.TARGET_NAME }} API=35 all
+        run: |
+          CLANG_BIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-clang"
+          make CLANG="${CLANG_BIN}" TARGET=${{ env.TARGET_NAME }} API=35 all
 
       - name: 打包编译产物ZIP
         run: zip -r payload-build.zip build/
