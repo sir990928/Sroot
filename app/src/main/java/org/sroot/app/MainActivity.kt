@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
@@ -244,17 +245,16 @@ private fun WorkflowCard(
         stage == WorkflowStage.IDLE -> -1
         else -> stage.index
     }
-    val title = if (stage == WorkflowStage.FAILED) {
-        stringResource(R.string.workflow_failed)
-    } else if (stage == WorkflowStage.IDLE) {
-        stringResource(R.string.workflow_waiting)
-    } else {
-        stringResource(stageLabel(stage))
+    val title = when {
+        stage == WorkflowStage.FAILED -> stringResource(R.string.workflow_failed)
+        stage == WorkflowStage.IDLE -> ""
+        else -> stringResource(stageLabel(stage))
     }
-    val detail = if (stage == WorkflowStage.FAILED && error != null) {
-        stringResource(R.string.workflow_failed_detail, error)
-    } else {
-        stringResource(noteLabel(note))
+    val detail = when {
+        stage == WorkflowStage.IDLE -> ""
+        stage == WorkflowStage.FAILED && error != null ->
+            stringResource(R.string.workflow_failed_detail, error)
+        else -> stringResource(noteLabel(note))
     }
 
     Card(
@@ -275,26 +275,35 @@ private fun WorkflowCard(
                 .padding(8.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            if (stage == WorkflowStage.IDLE) {
                 Text(
-                    stringResource(R.string.workflow_title),
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(R.string.workflow_title),
+                    textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium,
                 )
-                Spacer(Modifier.weight(1f))
-                Text(
-                    title,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = if (stage == WorkflowStage.FAILED) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.primary
-                    },
-                    style = MaterialTheme.typography.labelLarge,
-                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        stringResource(R.string.workflow_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = if (stage == WorkflowStage.FAILED) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             }
             LinearProgressIndicator(
                 progress = { workflowProgress(stage, failedAt) },
@@ -315,12 +324,14 @@ private fun WorkflowCard(
                 }
             }
             Spacer(Modifier.height(8.dp))
-            Text(
-                detail,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.labelSmall,
-            )
+            if (detail.isNotBlank()) {
+                Text(
+                    detail,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
         }
     }
 }
