@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +21,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -254,7 +257,18 @@ private fun WorkflowCard(
         stringResource(noteLabel(note))
     }
 
-    Card(modifier = modifier.fillMaxHeight()) {
+    Card(
+        modifier = modifier
+            .fillMaxHeight()
+            .animateContentSize(),
+        colors = CardDefaults.cardColors(
+            containerColor = when {
+                stage == WorkflowStage.FAILED -> MaterialTheme.colorScheme.errorContainer
+                stage == WorkflowStage.COMPLETE -> MaterialTheme.colorScheme.primaryContainer
+                else -> MaterialTheme.colorScheme.surfaceContainerHighest
+            },
+        ),
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
@@ -282,6 +296,11 @@ private fun WorkflowCard(
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
+            LinearProgressIndicator(
+                progress = { workflowProgress(stage, failedAt) },
+                modifier = Modifier.fillMaxWidth(),
+                drawStopIndicator = {},
+            )
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -349,10 +368,17 @@ private fun StageStep(
         }
         Spacer(Modifier.size(6.dp))
         Text(
+            modifier = Modifier.weight(1f),
             text = stringResource(stageLabel(step)),
             maxLines = 1,
             style = MaterialTheme.typography.labelSmall,
         )
+        if (active) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(14.dp),
+                strokeWidth = 2.dp,
+            )
+        }
     }
 }
 
@@ -408,6 +434,20 @@ private fun stageIcon(stage: WorkflowStage): ImageVector = when (stage) {
     WorkflowStage.START -> Icons.Filled.PlayArrow
     WorkflowStage.COMPLETE -> Icons.Filled.Check
     else -> Icons.Filled.Search
+}
+
+private fun workflowProgress(
+    stage: WorkflowStage,
+    failedAt: WorkflowStage?,
+): Float = when (stage) {
+    WorkflowStage.IDLE -> 0f
+    WorkflowStage.IDENTIFY -> 0.1f
+    WorkflowStage.DOWNLOAD -> 0.35f
+    WorkflowStage.START -> 0.7f
+    WorkflowStage.COMPLETE -> 1f
+    WorkflowStage.FAILED -> (
+        (failedAt?.index?.toFloat() ?: 0f) / workflowSteps.lastIndex
+    ).coerceIn(0f, 1f)
 }
 
 private fun noteLabel(note: WorkflowNote): Int = when (note) {
