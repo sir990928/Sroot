@@ -44,8 +44,9 @@ static int route_delay_usec(int attempt) {
     }
   }
 
+  // 就两个值交替
   static const int delays[] = {
-    50000, 30000, 70000, 10000, 100000, 150000, 20000, 120000,
+    5000, 6000,
   };
 
   int count = (int)(sizeof(delays) / sizeof(delays[0]));
