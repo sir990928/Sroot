@@ -1,4 +1,5 @@
 # Build output
+.gradle/
 build/
 out/
 dist/

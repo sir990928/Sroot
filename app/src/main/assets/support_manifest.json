@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "project": "Sroot",
+  "profiles": [
+    {
+      "profileId": "pa3q-S9380ZHU1AYA1",
+      "displayName": "Samsung Galaxy S25 Ultra SM-S9380 ZHU AYA1",
+      "models": ["SM-S9380"],
+      "fingerprintPrefixes": [
+        "samsung/pa3qzhx/pa3q:15/AP3A.240905.015"
+      ],
+      "androidReleases": ["15"],
+      "abis": ["arm64-v8a"],
+      "mode": "diagnostic"
+    }
+  ]
+}

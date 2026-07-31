@@ -57,6 +57,30 @@ native-library loading arrangement, and logging layout. Its native payload
 and device adaptation remain separate Sroot work and are not copied from the
 reference project's exploit path.
 
+## APP Branch Build
+
+The `app/` module is the APP-side worktree. It currently contains:
+
+- Compose UI and `ViewModel` state flow;
+- device and kernel snapshot collection;
+- a JSON support manifest in `app/src/main/assets/`;
+- an arm64 JNI diagnostic library;
+- structured native-process logging.
+
+The JSON manifest contains public device matching data only. It does not
+contain private offsets, helper binaries, or executable payloads. The current
+S9380 profile is marked `diagnostic`.
+
+Build this branch with:
+
+```powershell
+.\gradlew.bat :app:assembleDebug
+```
+
+The Android SDK and NDK must be configured locally. The generated APK is a
+diagnostic build and is not evidence that the private V6 ADB/shell path works
+from an ordinary application process.
+
 ## Adaptation Model
 
 The project separates generic research code from device-specific data:
