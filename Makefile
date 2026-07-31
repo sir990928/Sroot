@@ -1,6 +1,6 @@
 API ?= 35
 TARGET ?= pa3q-S9380ZHU1AYA1
-CLANG ?= $(ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-clang
+TARGET_CC := $(ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android$(API)-clang
 
 ROOT := .
 SRC_ORIGINAL := $(ROOT)/src/original
