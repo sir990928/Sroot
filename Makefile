@@ -1,6 +1,10 @@
 API ?= 35
 TARGET ?= pa3q-S9380ZHU1AYA1
-TARGET_CC := $(ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android$(API)-clang
+
+# 设置CLANG编译器，优先使用环境变量，否则使用TARGET_CC
+ifndef CLANG
+    CLANG := $(ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android$(API)-clang
+endif
 
 ROOT := .
 SRC_ORIGINAL := $(ROOT)/src/original
@@ -32,9 +36,17 @@ DEVICE_OBJECTS := \
 PAYLOAD := $(OUT_DIR)/cve-2026-43499-root-original-zhu-tracefs-v6.so
 HELPER := $(OUT_DIR)/cve-2026-43499-root
 
-.PHONY: all clean hashes
+.PHONY: all clean hashes debug
 
 all: $(PAYLOAD) $(HELPER)
+
+# 调试目标，显示变量值
+debug:
+	@echo "API = $(API)"
+	@echo "TARGET = $(TARGET)"
+	@echo "ANDROID_NDK_HOME = $(ANDROID_NDK_HOME)"
+	@echo "CLANG = $(CLANG)"
+	@echo "TARGET_FLAGS = $(TARGET_FLAGS)"
 
 $(TARGET_INCLUDE): $(TARGET_DIR)/target.h
 	mkdir -p $(@D)
