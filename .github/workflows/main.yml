@@ -20,19 +20,20 @@ jobs:
           fetch-depth: 0
 
       - name: 安装依赖工具
-        run: sudo apt update && sudo apt install -y make wget unzip zip
+        run: sudo apt update && sudo apt install -y make zip
 
-      - name: 下载并解压 NDK r27 (Google官方源)
-        run: |
-          wget https://dl.google.com/android/repository/android-ndk-r27-linux.zip
-          unzip -q android-ndk-r27-linux.zip
-          echo "ANDROID_NDK_HOME=$PWD/android-ndk-r27" >> $GITHUB_ENV
+      - name: 自动安装 NDK r29
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r29
+        env:
+          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk-r29
 
       - name: 校验NDK编译器
         run: |
           CLANG_PATH=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-clang
           echo "编译器路径: $CLANG_PATH"
-          test -x "$CLANG_PATH" || { echo "错误：编译器不存在！NDK包损坏"; exit 1; }
+          test -x "$CLANG_PATH" || { echo "错误：编译器不存在！"; exit 1; }
 
       - name: 编译漏洞程序
         run: |
