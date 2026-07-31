@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TARGET_NAME: pa3q-S9380ZHU1AYA1
+      API: 35
     steps:
       - name: 检出仓库代码
         uses: actions/checkout@v4
@@ -26,22 +27,42 @@ jobs:
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r29
-        # 删除！不要手动覆盖ANDROID_NDK_HOME，让action自动设置
-        # env:
-        #   ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk-r29
 
-      - name: 校验NDK编译器
+      - name: 校验NDK和环境
         run: |
-          CLANG_PATH=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-clang
           echo "ANDROID_NDK_HOME = $ANDROID_NDK_HOME"
-          echo "Clang完整路径 = $CLANG_PATH"
-          ls -la ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/ || echo "bin目录不存在"
-          test -x "$CLANG_PATH" || { echo "错误：编译器不存在！"; exit 1; }
+          echo "API = ${{ env.API }}"
+          
+          CLANG_PATH="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${{ env.API }}-clang"
+          echo "期望的编译器路径: $CLANG_PATH"
+          
+          # 列出可用的aarch64编译器
+          echo "可用的aarch64编译器："
+          ls ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-* 2>/dev/null || echo "未找到aarch64编译器"
+          
+          # 检查编译器是否存在
+          if [ ! -x "$CLANG_PATH" ]; then
+            echo "错误：编译器不存在！"
+            echo "尝试查找任何aarch64编译器："
+            find ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/ -name "*aarch64*clang*" -type f 2>/dev/null || echo "未找到任何aarch64编译器"
+            exit 1
+          fi
+          
+          echo "编译器验证成功！"
+          $CLANG_PATH --version
+
+      - name: 调试Makefile变量
+        run: |
+          export ANDROID_NDK_HOME
+          export CLANG="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${{ env.API }}-clang"
+          make debug API=${{ env.API }} TARGET=${{ env.TARGET_NAME }}
 
       - name: 编译漏洞程序
         run: |
-          CLANG_BIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-clang"
-          make CLANG="${CLANG_BIN}" TARGET=${{ env.TARGET_NAME }} API=35 all
+          export ANDROID_NDK_HOME
+          export CLANG="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${{ env.API }}-clang"
+          echo "使用编译器: $CLANG"
+          make API=${{ env.API }} TARGET=${{ env.TARGET_NAME }} all
 
       - name: 打包编译产物ZIP
         run: zip -r payload-build.zip build/
