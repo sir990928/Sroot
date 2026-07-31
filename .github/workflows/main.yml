@@ -32,7 +32,7 @@ jobs:
         run: make TARGET=${{ env.TARGET_NAME }} API=35 all
 
       - name: 打包编译产物ZIP
-        run: zip -r payload-build.zip build/${{ env.TARGET_NAME }}/
+        run: zip -r payload-build.zip build/
 
       - name: 上传制品压缩包
         uses: actions/upload-artifact@v4
