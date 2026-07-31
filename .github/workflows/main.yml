@@ -3,7 +3,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - "Root-My-Galaxy-Payloads/**"
+      - "src/**"
+      - "Makefile"
       - ".github/workflows/build-payload.yml"
   workflow_dispatch:
 
@@ -12,14 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TARGET_NAME: pa3q-S9380ZHU1AYA1
-      WORK_ROOT: ${{ github.workspace }}/Root-My-Galaxy-Payloads
     steps:
       - name: 检出仓库代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.Yml }}
-          persist-credentials: false
 
       - name: 安装依赖工具
         run: sudo apt update && sudo apt install -y make wget unzip zip
@@ -31,18 +29,14 @@ jobs:
           echo "ANDROID_NDK_HOME=$PWD/android-ndk-r27" >> $GITHUB_ENV
 
       - name: 编译漏洞程序
-        run: make -C ${{ env.WORK_ROOT }} TARGET=${{ env.TARGET_NAME }} API=35 all
+        run: make TARGET=${{ env.TARGET_NAME }} API=35 all
 
       - name: 打包编译产物ZIP
-        run: |
-          cd ${{ env.WORK_ROOT }}
-          # 修正路径：使用TARGET对应的输出目录
-          zip -r ${{ github.workspace }}/payload-build.zip build/${{ env.TARGET_NAME }}/
-          echo "ZIP_FILE=${{ github.workspace }}/payload-build.zip" >> $GITHUB_ENV
+        run: zip -r payload-build.zip build/${{ env.TARGET_NAME }}/
 
       - name: 上传制品压缩包
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TARGET_NAME }}-build-zip
-          path: ${{ env.ZIP_FILE }}
+          path: payload-build.zip
           retention-days: 30
