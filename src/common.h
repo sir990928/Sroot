@@ -309,6 +309,7 @@ extern uint64_t slide_bootid_before;
 extern uint64_t slide_bootid_after;
 extern uint64_t slide_bootid_want;
 extern ssize_t slide_bootid_restore_ret;
+extern uintptr_t slide_p0_offset;
 extern uint64_t current_task_addr;
 extern uint64_t current_cred_addr;
 extern uint64_t current_real_cred_addr;

@@ -7,8 +7,10 @@ ifndef CLANG
 endif
 
 ROOT := .
-SRC_ORIGINAL := $(ROOT)/src/original
-SRC_DEVICE := $(ROOT)/src/device
+SRC := $(ROOT)/src
+# Keep the historical variable names for callers that override or inspect them.
+SRC_ORIGINAL := $(SRC)
+SRC_DEVICE := $(SRC)
 TARGET_DIR := $(ROOT)/target/$(TARGET)
 INCLUDE_DIR := $(ROOT)/include
 TARGET_INCLUDE := $(INCLUDE_DIR)/targets/$(TARGET)/target.h
@@ -18,8 +20,9 @@ OUT_DIR := $(BUILD_DIR)/artifact
 
 TARGET_FLAGS := --target=aarch64-linux-android$(API)
 COMMON_CFLAGS := $(TARGET_FLAGS) -O2 -g0 -Wall -Wextra -Wno-unused-parameter
-ORIGINAL_CPPFLAGS := -I$(SRC_ORIGINAL) -I$(INCLUDE_DIR) -I$(TARGET_DIR) -DTARGET_CONFIG_H=\"target.h\"
-DEVICE_CPPFLAGS := -I$(SRC_DEVICE) -I$(INCLUDE_DIR) -I$(TARGET_DIR)
+COMMON_CPPFLAGS := -I$(SRC) -I$(INCLUDE_DIR) -I$(TARGET_DIR) -DTARGET_CONFIG_H=\"target.h\"
+ORIGINAL_CPPFLAGS := $(COMMON_CPPFLAGS)
+DEVICE_CPPFLAGS := $(COMMON_CPPFLAGS)
 
 ORIGINAL_OBJECTS := \
 	$(OBJ_DIR)/main.o \
@@ -55,13 +58,13 @@ $(TARGET_INCLUDE): $(TARGET_DIR)/target.h
 $(OBJ_DIR) $(OUT_DIR):
 	mkdir -p $@
 
-$(OBJ_DIR)/%.o: $(SRC_ORIGINAL)/%.c $(TARGET_INCLUDE) | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC)/%.c $(TARGET_INCLUDE) | $(OBJ_DIR)
 	$(CLANG) $(COMMON_CFLAGS) -fPIC $(ORIGINAL_CPPFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/root-umh.o: $(SRC_DEVICE)/root.c $(TARGET_INCLUDE) | $(OBJ_DIR)
+$(OBJ_DIR)/root-umh.o: $(SRC)/root.c $(TARGET_INCLUDE) | $(OBJ_DIR)
 	$(CLANG) $(COMMON_CFLAGS) -fPIC $(DEVICE_CPPFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/slide-tracefs.o: $(SRC_DEVICE)/slide.c $(TARGET_INCLUDE) | $(OBJ_DIR)
+$(OBJ_DIR)/slide-tracefs.o: $(SRC)/slide.c $(TARGET_INCLUDE) | $(OBJ_DIR)
 	$(CLANG) $(COMMON_CFLAGS) -fPIC $(DEVICE_CPPFLAGS) -c $< -o $@
 
 $(PAYLOAD): $(ORIGINAL_OBJECTS) $(DEVICE_OBJECTS) | $(OUT_DIR)

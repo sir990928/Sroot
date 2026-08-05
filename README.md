@@ -34,15 +34,11 @@ SYSTEM_UNBOUND_WQ_OFF               0x02149e60
 ROOT_UMH_PATH                       /data/local/tmp/cve-2026-43499-root
 ```
 
-## Source split
+## Source layout
 
-`src/original` contains `main.c`, `util.c`, `fops.c`, `pipe.c`,
-`preload_minimal.c`, and compatibility globals from the restored original
-tree.
-
-`src/device` contains the tracefs `slide.c` and UMH `root.c`. These two files
-were compiled with the device include tree; the object hashes match the V6
-objects saved in `objects`.
+All native sources now live directly under `src/`. The shared KernelSnitch
+headers remain under `src/kernelsnitch/`. The Makefile keeps the historical
+source variables and object list so existing build commands continue to work.
 
 `helper/su_daemon.c` is the helper used both by `--run-payload` and by the
 kernel UMH path. It must be installed at the fixed `ROOT_UMH_PATH`.
