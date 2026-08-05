@@ -69,8 +69,8 @@ On Linux, WSL, or macOS with an Android NDK clang:
 make CLANG=/path/to/clang
 ```
 
-The Makefile creates intermediate files under `build/v6/obj`; they are not
-needed at runtime and can be removed with `make clean`.
+The Makefile writes only final artifacts under `build/v6/artifact`; object
+files are not required for this build.
 
 The expected payload hash is:
 
