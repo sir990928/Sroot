@@ -9,17 +9,11 @@ endif
 ROOT := .
 SRC_ADB := $(ROOT)/src/adb
 SRC_APP := $(ROOT)/src/app
-# Keep the historical variable names for callers that override or inspect them.
-SRC := $(SRC_ADB)
-SRC_ORIGINAL := $(SRC_ADB)
-SRC_DEVICE := $(SRC_ADB)
 ADB_TARGET_DIR := $(ROOT)/target/adb/$(TARGET)
 APP_TARGET_DIR := $(ROOT)/target/app/$(TARGET)
-TARGET_DIR := $(ADB_TARGET_DIR)
 INCLUDE_DIR := $(ROOT)/include
 ADB_TARGET_INCLUDE := $(INCLUDE_DIR)/targets/$(TARGET)/target.h
 APP_TARGET_INCLUDE := $(INCLUDE_DIR)/targets/app/$(TARGET)/target.h
-TARGET_INCLUDE := $(ADB_TARGET_INCLUDE)
 BUILD_DIR := $(ROOT)/build/v6
 OBJ_DIR := $(BUILD_DIR)/obj
 APP_OBJ_DIR := $(BUILD_DIR)/app-obj
@@ -31,24 +25,16 @@ ADB_CPPFLAGS := -I$(SRC_ADB) -I$(INCLUDE_DIR) -I$(ADB_TARGET_DIR) \
 	-DTARGET_CONFIG_H=\"target.h\" -DAPP_PAYLOAD=0
 APP_CPPFLAGS := -I$(SRC_APP) -I$(INCLUDE_DIR) -I$(APP_TARGET_DIR) \
 	-DTARGET_CONFIG_H=\"target.h\" -DAPP_PAYLOAD=1
-ORIGINAL_CPPFLAGS := $(ADB_CPPFLAGS)
-DEVICE_CPPFLAGS := $(ADB_CPPFLAGS)
 
-ORIGINAL_OBJECTS := \
+ADB_OBJECTS := \
 	$(OBJ_DIR)/main.o \
 	$(OBJ_DIR)/util.o \
 	$(OBJ_DIR)/fops.o \
 	$(OBJ_DIR)/pipe.o \
 	$(OBJ_DIR)/preload_minimal.o \
-	$(OBJ_DIR)/root_compat_globals.o
-
-DEVICE_OBJECTS := \
+	$(OBJ_DIR)/root_compat_globals.o \
 	$(OBJ_DIR)/root-umh.o \
 	$(OBJ_DIR)/slide-tracefs.o
-
-ADB_OBJECTS := \
-	$(ORIGINAL_OBJECTS) \
-	$(DEVICE_OBJECTS)
 
 APP_OBJECTS := \
 	$(APP_OBJ_DIR)/main.o \
@@ -60,13 +46,13 @@ APP_OBJECTS := \
 	$(APP_OBJ_DIR)/root-umh.o \
 	$(APP_OBJ_DIR)/slide-app.o
 
-PAYLOAD := $(OUT_DIR)/cve-2026-43499
+ADB_PAYLOAD := $(OUT_DIR)/cve-2026-43499
 APP_PAYLOAD := $(OUT_DIR)/cve-2026-43499-app.so
-HELPER := $(OUT_DIR)/cve-2026-43499-root
+ROOT_HELPER := $(OUT_DIR)/cve-2026-43499-root
 
 .PHONY: all clean hashes debug
 
-all: $(PAYLOAD) $(APP_PAYLOAD) $(HELPER)
+all: $(ADB_PAYLOAD) $(APP_PAYLOAD) $(ROOT_HELPER)
 
 # 调试目标，显示变量值
 debug:
@@ -75,9 +61,9 @@ debug:
 	@echo "ANDROID_NDK_HOME = $(ANDROID_NDK_HOME)"
 	@echo "CLANG = $(CLANG)"
 	@echo "TARGET_FLAGS = $(TARGET_FLAGS)"
-	@echo "ADB_PAYLOAD = $(PAYLOAD)"
+	@echo "ADB_PAYLOAD = $(ADB_PAYLOAD)"
 	@echo "APP_PAYLOAD = $(APP_PAYLOAD)"
-	@echo "HELPER = $(HELPER)"
+	@echo "ROOT_HELPER = $(ROOT_HELPER)"
 
 $(ADB_TARGET_INCLUDE): $(ADB_TARGET_DIR)/target.h
 	mkdir -p $(@D)
@@ -99,7 +85,7 @@ $(OBJ_DIR)/root-umh.o: $(SRC_ADB)/root.c $(ADB_TARGET_INCLUDE) | $(OBJ_DIR)
 $(OBJ_DIR)/slide-tracefs.o: $(SRC_ADB)/slide.c $(ADB_TARGET_INCLUDE) | $(OBJ_DIR)
 	$(CLANG) $(COMMON_CFLAGS) -fPIC $(ADB_CPPFLAGS) -c $< -o $@
 
-$(PAYLOAD): $(ADB_OBJECTS) | $(OUT_DIR)
+$(ADB_PAYLOAD): $(ADB_OBJECTS) | $(OUT_DIR)
 	$(CLANG) $(TARGET_FLAGS) -shared -fuse-ld=lld \
 		-Wl,--no-undefined -Wl,-z,relro -Wl,-z,now \
 		$(ADB_OBJECTS) -pthread -ldl -o $@
@@ -118,12 +104,12 @@ $(APP_PAYLOAD): $(APP_OBJECTS) | $(OUT_DIR)
 		-Wl,--no-undefined -Wl,-z,relro -Wl,-z,now \
 		$(APP_OBJECTS) -pthread -ldl -o $@
 
-$(HELPER): $(ROOT)/helper/su_daemon.c | $(OUT_DIR)
+$(ROOT_HELPER): $(ROOT)/helper/su_daemon.c | $(OUT_DIR)
 	$(CLANG) $(TARGET_FLAGS) -fPIE -pie -O2 -g0 -Wall -Wextra \
 		$< -ldl -o $@
 
 hashes: all
-	sha256sum $(PAYLOAD) $(APP_PAYLOAD) $(HELPER) \
+	sha256sum $(ADB_PAYLOAD) $(APP_PAYLOAD) $(ROOT_HELPER) \
 		$(ADB_TARGET_DIR)/target.h $(APP_TARGET_DIR)/target.h
 
 clean:
