@@ -1,0 +1,71 @@
+name: Build CVE Payload AYA1
+
+on:
+  push:
+    branches:
+      - main
+      - cve-so
+    paths:
+      - ".github/workflows/main.yml"
+      - "Makefile"
+      - "src/**"
+      - "target/**"
+      - "helper/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_NAME: pa3q-S9380ZHU1AYA1
+      API: "35"
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y make zip
+
+      - name: Install Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r29
+
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -eu
+          : "${ANDROID_NDK_HOME:?ANDROID_NDK_HOME is not set}"
+          clang_path="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${API}-clang"
+          test -x "$clang_path"
+          "$clang_path" --version
+
+      - name: Build payload and helper
+        shell: bash
+        run: |
+          set -eu
+          export CLANG="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${API}-clang"
+          make debug API="$API" TARGET="$TARGET_NAME" CLANG="$CLANG"
+          make clean all API="$API" TARGET="$TARGET_NAME" CLANG="$CLANG"
+          test -s build/v6/artifact/cve-2026-43499-root-original-zhu-tracefs-v6.so
+          test -s build/v6/artifact/cve-2026-43499-root
+
+      - name: Record hashes
+        shell: bash
+        run: |
+          set -eu
+          sha256sum \
+            build/v6/artifact/cve-2026-43499-root-original-zhu-tracefs-v6.so \
+            build/v6/artifact/cve-2026-43499-root \
+            target/${TARGET_NAME}/target.h
+
+      - name: Package build artifacts
+        run: zip -j payload-build.zip build/v6/artifact/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TARGET_NAME }}-build-zip
+          path: payload-build.zip
+          retention-days: 30
