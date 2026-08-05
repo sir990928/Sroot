@@ -46,6 +46,10 @@ DEVICE_OBJECTS := \
 	$(OBJ_DIR)/root-umh.o \
 	$(OBJ_DIR)/slide-tracefs.o
 
+ADB_OBJECTS := \
+	$(ORIGINAL_OBJECTS) \
+	$(DEVICE_OBJECTS)
+
 APP_OBJECTS := \
 	$(APP_OBJ_DIR)/main.o \
 	$(APP_OBJ_DIR)/util.o \
@@ -95,10 +99,10 @@ $(OBJ_DIR)/root-umh.o: $(SRC_ADB)/root.c $(ADB_TARGET_INCLUDE) | $(OBJ_DIR)
 $(OBJ_DIR)/slide-tracefs.o: $(SRC_ADB)/slide.c $(ADB_TARGET_INCLUDE) | $(OBJ_DIR)
 	$(CLANG) $(COMMON_CFLAGS) -fPIC $(ADB_CPPFLAGS) -c $< -o $@
 
-$(PAYLOAD): $(ORIGINAL_OBJECTS) $(DEVICE_OBJECTS) | $(OUT_DIR)
+$(PAYLOAD): $(ADB_OBJECTS) | $(OUT_DIR)
 	$(CLANG) $(TARGET_FLAGS) -shared -fuse-ld=lld \
 		-Wl,--no-undefined -Wl,-z,relro -Wl,-z,now \
-		$(ORIGINAL_OBJECTS) $(DEVICE_OBJECTS) -pthread -ldl -o $@
+		$(ADB_OBJECTS) -pthread -ldl -o $@
 
 $(APP_OBJ_DIR)/%.o: $(SRC_APP)/%.c $(APP_TARGET_INCLUDE) | $(APP_OBJ_DIR)
 	$(CLANG) $(COMMON_CFLAGS) -fPIC $(APP_CPPFLAGS) -c $< -o $@
