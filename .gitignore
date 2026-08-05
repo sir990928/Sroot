@@ -2,6 +2,7 @@
 build/
 out/
 dist/
+include/targets/
 *.o
 *.so
 *.a
