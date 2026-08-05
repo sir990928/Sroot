@@ -56,7 +56,7 @@ APP_OBJECTS := \
 	$(APP_OBJ_DIR)/root-umh.o \
 	$(APP_OBJ_DIR)/slide-app.o
 
-PAYLOAD := $(OUT_DIR)/cve-2026-43499-root-original-zhu-tracefs-v6.so
+PAYLOAD := $(OUT_DIR)/cve-2026-43499
 APP_PAYLOAD := $(OUT_DIR)/cve-2026-43499-app.so
 HELPER := $(OUT_DIR)/cve-2026-43499-root
 

