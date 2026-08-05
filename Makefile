@@ -51,6 +51,7 @@ ADB_HEADERS := \
 APP_HEADERS := \
 	$(SRC_APP)/common.h \
 	$(SRC_APP)/offset.h \
+	$(APP_TARGET_DIR)/p0_fingerprint.h \
 	$(wildcard $(SRC_APP)/kernelsnitch/*.h)
 
 ADB_PAYLOAD := $(OUT_DIR)/cve-2026-43499
