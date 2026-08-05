@@ -8,9 +8,13 @@ under `build/v6/obj` or `objects-rebuilt` during compilation.
 
 ## Target configuration
 
-The offset table is:
+The ADB offset table is:
 
-`target/pa3q-S9380ZHU1AYA1/target.h`
+`target/adb/pa3q-S9380ZHU1AYA1/target.h`
+
+The APP copy starts at:
+
+`target/app/pa3q-S9380ZHU1AYA1/target.h`
 
 Target table SHA-256:
 
@@ -36,9 +40,10 @@ ROOT_UMH_PATH                       /data/local/tmp/cve-2026-43499-root
 
 ## Source layout
 
-All native sources now live directly under `src/`. The shared KernelSnitch
-headers remain under `src/kernelsnitch/`. The Makefile keeps the historical
-source variables and object list so existing build commands continue to work.
+The verified ADB baseline is under `src/adb/`. A matching working copy is
+under `src/app/` for the APP-specific implementation. The Makefile currently
+builds the ADB baseline; APP sources can diverge without changing the tested
+ADB tree. KernelSnitch headers are kept inside each variant directory.
 
 `helper/su_daemon.c` is the helper used both by `--run-payload` and by the
 kernel UMH path. It must be installed at the fixed `ROOT_UMH_PATH`.

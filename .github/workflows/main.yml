@@ -49,6 +49,7 @@ jobs:
           make debug API="$API" TARGET="$TARGET_NAME" CLANG="$CLANG"
           make clean all API="$API" TARGET="$TARGET_NAME" CLANG="$CLANG"
           test -s build/v6/artifact/cve-2026-43499-root-original-zhu-tracefs-v6.so
+          test -s build/v6/artifact/cve-2026-43499-app.so
           test -s build/v6/artifact/cve-2026-43499-root
 
       - name: Record hashes
@@ -57,8 +58,10 @@ jobs:
           set -eu
           sha256sum \
             build/v6/artifact/cve-2026-43499-root-original-zhu-tracefs-v6.so \
+            build/v6/artifact/cve-2026-43499-app.so \
             build/v6/artifact/cve-2026-43499-root \
-            target/${TARGET_NAME}/target.h
+            target/adb/${TARGET_NAME}/target.h \
+            target/app/${TARGET_NAME}/target.h
 
       - name: Package build artifacts
         run: zip -j payload-build.zip build/v6/artifact/*
